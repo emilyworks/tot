@@ -1,4 +1,15 @@
-# Official Repo of Tree of Thoughts (ToT)
+# Tree of Thoughts - Exploratory Extension Project
+
+Exploration of the efficiency and efficacy of ToT using A* and MCTS search methods, as well as with other LLMs.
+
+Details TBA.
+
+
+Please find the README from the original ToT repository below the cut.
+
+***
+
+## Official Repo of Tree of Thoughts (ToT)
 
 <p>
     <a href="https://badge.fury.io/py/tree-of-thoughts-llm">
