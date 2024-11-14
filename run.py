@@ -1,12 +1,16 @@
 import os
 import json
 import argparse
+import time
 
-from tot.tasks import get_task
-from tot.methods.bfs import solve, naive_solve
-from tot.models import gpt_usage
+from src.tot.tasks import get_task
+from src.tot.methods.bfs import solve, naive_solve
+from src.tot.models import gpt_usage
 
 def run(args):
+    '''
+    main run function
+    '''
     task = get_task(args.task)
     logs, cnt_avg, cnt_any = [], 0, 0
     if args.naive_run:
@@ -16,6 +20,7 @@ def run(args):
     os.makedirs(os.path.dirname(file), exist_ok=True)
 
     for i in range(args.task_start_index, args.task_end_index):
+
         # solve
         if args.naive_run:
             ys, info = naive_solve(args, task, i) 
@@ -41,17 +46,26 @@ def run(args):
 
 
 def parse_args():
+    '''
+    Determines the conditions for the run.
+    '''
     args = argparse.ArgumentParser()
-    args.add_argument('--backend', type=str, choices=['gpt-4', 'gpt-3.5-turbo'], default='gpt-4')
-    args.add_argument('--temperature', type=float, default=0.7)
 
+    #what model to use
+    args.add_argument('--backend', type=str, choices=['gpt-4o', 'gpt-4o-mini', 'other'], default='gpt-4o')
+
+    #what temperature to use
+    args.add_argument('--temperature', type=float, default=0.0)
+
+    #the problem task
     args.add_argument('--task', type=str, required=True, choices=['game24', 'text', 'crosswords'])
+
+    #which tasks from the data file to solve
     args.add_argument('--task_start_index', type=int, default=900)
     args.add_argument('--task_end_index', type=int, default=1000)
-
+    
     args.add_argument('--naive_run', action='store_true')
     args.add_argument('--prompt_sample', type=str, choices=['standard', 'cot'])  # only used when method_generate = sample, or naive_run
-
     args.add_argument('--method_generate', type=str, choices=['sample', 'propose'])
     args.add_argument('--method_evaluate', type=str, choices=['value', 'vote'])
     args.add_argument('--method_select', type=str, choices=['sample', 'greedy'], default='greedy')

@@ -1,7 +1,7 @@
 import itertools
 import numpy as np
 from functools import partial
-from tot.models import inference_model
+from ..models import inference_model
 
 def get_value(task, x, y, n_evaluate_sample, cache_value=True):
     value_prompt = task.value_prompt_wrap(x, y)
@@ -14,6 +14,9 @@ def get_value(task, x, y, n_evaluate_sample, cache_value=True):
     return value
 
 def get_values(task, x, ys, n_evaluate_sample, cache_value=True):
+    
+    # ys = list(set(ys))
+    # print(ys)
     values = []
     local_value_cache = {}
     for y in ys:  # each partial output
@@ -23,6 +26,7 @@ def get_values(task, x, ys, n_evaluate_sample, cache_value=True):
             value = get_value(task, x, y, n_evaluate_sample, cache_value=cache_value)
             local_value_cache[y] = value
         values.append(value)
+    # print(values)
     return values
 
 def get_votes(task, x, ys, n_evaluate_sample):
@@ -33,6 +37,7 @@ def get_votes(task, x, ys, n_evaluate_sample):
 
 def get_proposals(task, x, y): 
     propose_prompt = task.propose_prompt_wrap(x, y)
+    print("prompt proposed -- now running inference...")
     proposals = inference_model(propose_prompt, n=1, stop=None)[0].split('\n')
     return [y + _ + '\n' for _ in proposals]
 
@@ -49,24 +54,34 @@ def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
 def solve(args, task, idx, to_print=True):
     global inference_model
     inference_model = partial(inference_model, model=args.backend, temperature=args.temperature)
-    print(inference_model)
+    # print(inference_model)
     x = task.get_input(idx)  # input
     ys = ['']  # current output candidates
     infos = []
+
     for step in range(task.steps):
+        print("Started Steps!!")
         # generation
         if args.method_generate == 'sample':
             new_ys = [get_samples(task, x, y, args.n_generate_sample, prompt_sample=args.prompt_sample, stop=task.stops[step]) for y in ys]
-        elif args.method_generate == 'propose':
+        # elif args.method_generate == 'propose':
+        else:
             new_ys = [get_proposals(task, x, y) for y in ys]
         new_ys = list(itertools.chain(*new_ys))
         ids = list(range(len(new_ys)))
+
+        print("Starting eval!!")
         # evaluation
         if args.method_evaluate == 'vote':
             values = get_votes(task, x, new_ys, args.n_evaluate_sample)
         elif args.method_evaluate == 'value':
             values = get_values(task, x, new_ys, args.n_evaluate_sample)
-
+        
+        print("THESE ARE THE VALUES")
+        print(values)
+        print("********")
+        
+        print("Starting selection!!")
         # selection
         if args.method_select == 'sample':
             ps = np.array(values) / sum(values)

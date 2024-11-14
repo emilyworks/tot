@@ -2,8 +2,8 @@ import re
 import os
 import sympy
 import pandas as pd
-from tot.tasks.base import Task, DATA_PATH
-from tot.prompts.game24 import * 
+from src.tot.tasks.base import Task, DATA_PATH
+from src.tot.prompts.game24 import * 
 
 
 def get_current_numbers(y: str) -> str:
