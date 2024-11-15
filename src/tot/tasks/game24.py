@@ -74,10 +74,6 @@ class Game24Task(Task):
     
     @staticmethod
     def value_prompt_wrap(x: str, y: str) -> str:
-        # print("IM IN VALUE PROMPT WRAP")
-        # print(y)
-        # print(x)
-        # print("******")
         last_line = y.strip().split('\n')[-1]
         if 'left: ' not in last_line:  # last step
             ans = last_line.lower().replace('answer: ', '')

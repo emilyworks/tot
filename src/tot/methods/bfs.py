@@ -14,15 +14,10 @@ def get_value(task, x, y, n_evaluate_sample, cache_value=True):
     return value
 
 def get_values(task, x, ys, n_evaluate_sample, cache_value=True):
-    
-    # ys = list(set(ys))
-    # print(ys)
+
     values = []
     local_value_cache = {}
     for y in ys:  # each partial output
-        # print("THIS IS THE Y")
-        # print(y)
-        # print("*****")
         if y in local_value_cache:  # avoid duplicate candidates
             value = 0
         else:    
@@ -40,10 +35,8 @@ def get_votes(task, x, ys, n_evaluate_sample):
 
 def get_proposals(task, x, y): 
     propose_prompt = task.propose_prompt_wrap(x, y)
-    # print("prompt proposed -- now running inference...")
     proposals = inference_model(propose_prompt, n=1, stop=None)[0].split('\n')
-    # print(proposals)
-    # print("*****=======")
+
     return [y + _ + '\n' for _ in proposals]
 
 def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
@@ -72,26 +65,15 @@ def solve(args, task, idx, to_print=True):
         # elif args.method_generate == 'propose':
         else:
             new_ys = [get_proposals(task, x, y) for y in ys]
-            # print("NEW YS BEFORE ITERTOOl")
-            # print(new_ys)
-            # print("**********")
         new_ys = list(itertools.chain(*new_ys))
         ids = list(range(len(new_ys)))
-        # print("THESE ARE THE NEW YS")
-        # print(new_ys)
-        # print("**********")
-        print("Starting eval!!")
+
         # evaluation
         if args.method_evaluate == 'vote':
             values = get_votes(task, x, new_ys, args.n_evaluate_sample)
         elif args.method_evaluate == 'value':
             values = get_values(task, x, new_ys, args.n_evaluate_sample)
         
-        # print("THESE ARE THE VALUES")
-        # print(values)
-        # print("********")
-        
-        print("Starting selection!!")
         # selection
         if args.method_select == 'sample':
             ps = np.array(values) / sum(values)

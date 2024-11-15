@@ -22,22 +22,17 @@ def run(args):
     for i in range(args.task_start_index, args.task_end_index):
 
         # solve
+        start_timer = time.perf_counter()
         if args.naive_run:
             ys, info = naive_solve(args, task, i) 
         else:
             ys, info = solve(args, task, i)
-
-
-        # print("HEY IM IN RUN AND I SOLVED")
-        # print("THIS IS THE Y")
-        # print(ys)
-        # print("ThIS IS THE INFO")
-        # print(info)
-        # exit()
+        runtime = time.perf_counter()-start_timer
+        print(runtime)
 
         # log
         infos = [task.test_output(i, y) for y in ys]
-        info.update({'idx': i, 'ys': ys, 'infos': infos, 'usage_so_far': gpt_usage(args.backend)})
+        info.update({'idx': i, 'ys': ys, 'infos': infos, 'usage_so_far': gpt_usage(args.backend), 'total_runtime': runtime})
         logs.append(info)
         with open(file, 'w') as f:
             json.dump(logs, f, indent=4)

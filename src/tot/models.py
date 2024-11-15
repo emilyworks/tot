@@ -25,8 +25,7 @@ def inference_model(prompt, model="gpt-4o", temperature=0.7, max_tokens=1000, n=
     '''
     Driver function for model inference.
     '''
-    # print("made it into driver.")
-    if model == "llama_3.2" and vllm:
+    if model == "llama_3.2" and vllm: #will change this later
         return llama_32(prompt, quant, vllm, temperature, max_tokens, n, stop)
     else:
         messages = [{"role": "system", "content": "You are a helpful assistant."},
@@ -56,7 +55,7 @@ def hf_model(model, input_tokens, temperature=0.7, max_tokens=1000, n=1, stop=No
     outputs = []
 
     while n > 0:
-        cnt = min(n, 20) #never generate more than 20 outputs per same input
+        cnt = min(n, 20) 
         n -= cnt
         outputs = model.generate(**input_tokens, temperature=temperature, max_new_tokens=max_tokens, num_return_sequences=cnt) #might add stopping criteria depending on heuristics experimentation
         #need to take a look at the specific output format once i get access to the gated repo
@@ -79,7 +78,7 @@ def chatgpt(messages, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop
         res = client.chat.completions.create(model=model, messages=messages, temperature=temperature, n=cnt, stop=stop)
         res_answer = res.choices[0].message.content
         # print(res_answer)
-        outputs.extend([res_answer]) #will add in support for generate sample > 1 hyperparam later
+        outputs.extend([res_answer]) #will add in support for n > 1 hyperparam later
 
         # log completion tokens
         completion_tokens += res.usage.completion_tokens
