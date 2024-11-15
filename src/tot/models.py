@@ -73,22 +73,14 @@ def chatgpt(messages, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop
     outputs = []
     client = OpenAI()
     while n > 0:
-        cnt = min(n, 20) #never generate more than 20 outputs per same input
+        cnt = min(n, 20) 
         n -= cnt
-        
-        # print("made it into n loop")
-        # res = completions_with_backoff(model=model, messages=messages, temperature=temperature, n=cnt, stop=stop)
-        # print(messages)
+
         res = client.chat.completions.create(model=model, messages=messages, temperature=temperature, n=cnt, stop=stop)
-        # print("got result from chatgpt")
-        # print(cnt)
-        # print(res)
         res_answer = res.choices[0].message.content
         # print(res_answer)
-        outputs.extend(res_answer.split('\n'))
-        # print(outputs)
-        
-        # print(f"{n} inference complete. now logging...")
+        outputs.extend([res_answer]) #will add in support for generate sample > 1 hyperparam later
+
         # log completion tokens
         completion_tokens += res.usage.completion_tokens
         prompt_tokens += res.usage.prompt_tokens

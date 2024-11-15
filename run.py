@@ -27,6 +27,14 @@ def run(args):
         else:
             ys, info = solve(args, task, i)
 
+
+        # print("HEY IM IN RUN AND I SOLVED")
+        # print("THIS IS THE Y")
+        # print(ys)
+        # print("ThIS IS THE INFO")
+        # print(info)
+        # exit()
+
         # log
         infos = [task.test_output(i, y) for y in ys]
         info.update({'idx': i, 'ys': ys, 'infos': infos, 'usage_so_far': gpt_usage(args.backend)})
