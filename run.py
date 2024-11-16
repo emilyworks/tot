@@ -7,10 +7,23 @@ from src.tot.tasks import get_task
 from src.tot.methods.bfs import solve, naive_solve
 from src.tot.models import gpt_usage
 
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+
+
 def run(args):
     '''
     main run function
     '''
+    #load in non-gpt model in this driver function for now to avoid repeated loading later on
+    if args.backend == 'llama':
+        tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+        model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+    else:
+        model = None
+        tokenizer = None
+
+    #set up
     task = get_task(args.task)
     logs, cnt_avg, cnt_any = [], 0, 0
     if args.naive_run:
@@ -19,20 +32,22 @@ def run(args):
         file = f'./logs/{args.task}/{args.backend}_{args.temperature}_{args.method_generate}{args.n_generate_sample}_{args.method_evaluate}{args.n_evaluate_sample}_{args.method_select}{args.n_select_sample}_start{args.task_start_index}_end{args.task_end_index}.json'
     os.makedirs(os.path.dirname(file), exist_ok=True)
 
+    #run the specified range of tasks
     for i in range(args.task_start_index, args.task_end_index):
 
         # solve
         start_timer = time.perf_counter()
         if args.naive_run:
-            ys, info = naive_solve(args, task, i) 
+            ys, info = naive_solve(args, task, i, model, tokenizer) 
         else:
-            ys, info = solve(args, task, i)
+            ys, info = solve(args, task, i, model, tokenizer)
+
         runtime = time.perf_counter()-start_timer
         print(runtime)
 
         # log
         infos = [task.test_output(i, y) for y in ys]
-        info.update({'idx': i, 'ys': ys, 'infos': infos, 'usage_so_far': gpt_usage(args.backend), 'total_runtime': runtime})
+        info.update({'idx': i, 'ys': ys, 'infos': infos, 'usage_so_far (gpt only)': gpt_usage(args.backend), 'total_runtime': runtime})
         logs.append(info)
         with open(file, 'w') as f:
             json.dump(logs, f, indent=4)
@@ -55,7 +70,7 @@ def parse_args():
     args = argparse.ArgumentParser()
 
     #what model to use
-    args.add_argument('--backend', type=str, choices=['gpt-4o', 'gpt-4o-mini', 'other'], default='gpt-4o')
+    args.add_argument('--backend', type=str, choices=['gpt-4o', 'llama'], default='gpt-4o')
 
     #what temperature to use
     args.add_argument('--temperature', type=float, default=0.0)

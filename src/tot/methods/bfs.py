@@ -49,9 +49,9 @@ def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
     samples = inference_model(prompt, n=n_generate_sample, stop=stop)
     return [y + _ for _ in samples]
 
-def solve(args, task, idx, to_print=True):
+def solve(args, task, idx, model, tokenizer, to_print=True):
     global inference_model
-    inference_model = partial(inference_model, model=args.backend, temperature=args.temperature)
+    inference_model = partial(inference_model, model=model, tokenizer=tokenizer, temperature=args.temperature)
     # print(inference_model)
     x = task.get_input(idx)  # input
     ys = ['']  # current output candidates

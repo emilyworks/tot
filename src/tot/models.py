@@ -2,7 +2,8 @@ import os
 import openai
 from openai import OpenAI
 import backoff 
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+import transformers
 
 completion_tokens = prompt_tokens = 0
 
@@ -21,45 +22,42 @@ if api_base != "":
 ### Model Inference ###
 #######################
 
-def inference_model(prompt, model="gpt-4o", temperature=0.7, max_tokens=1000, n=1, stop=None, vllm=False, quant=False) -> list:
+def inference_model(prompt, model, tokenizer, temperature=0.7, max_tokens=1000, n=5, stop=None) -> list:
     '''
     Driver function for model inference.
     '''
-    if model == "llama_3.2" and vllm: #will change this later
-        return llama_32(prompt, quant, vllm, temperature, max_tokens, n, stop)
+    if model: #will modify this later to include support for other variations
+        return hf_model(model, tokenizer, prompt, temperature, max_tokens, n, stop)
     else:
+        model = "gpt-4o"
         messages = [{"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": prompt}]
         return chatgpt(model=model, messages=messages, temperature=temperature, max_tokens=max_tokens, n=n, stop=stop)
 
-def llama_32(prompt, temperature, max_tokens, n, stop, quant=None, vllm=None): #will add vllm support later
-    '''
-    Use llama3.2 for inference
-    '''
-    # if quant:
-    #     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct-QLORA_INT4_EO8")
-    #     model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct-QLORA_INT4_EO8")
-    # else:
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B")
-    model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B")
-    
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = hf_model(model, inputs, temperature, max_tokens, n, stop)
-    
-    return outputs
-
-def hf_model(model, input_tokens, temperature=0.7, max_tokens=1000, n=1, stop=None):
+def hf_model(model, tokenizer, prompt, temperature=0.7, max_tokens=1000, n=5, stop=None):
     """
     Given a model (Huggingface) and input tokens, generate an output
     """
     outputs = []
 
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    #tokenize inputs
+    inputs = tokenizer(prompt, return_tensors="pt")
+    inputs = inputs.to(device)
+    # print(inputs)
+    model.to(device)
+
     while n > 0:
         cnt = min(n, 20) 
         n -= cnt
-        outputs = model.generate(**input_tokens, temperature=temperature, max_new_tokens=max_tokens, num_return_sequences=cnt) #might add stopping criteria depending on heuristics experimentation
-        #need to take a look at the specific output format once i get access to the gated repo
-        #need to outputs.extend()
+
+        #actual generation
+        out = model.generate(**inputs, temperature=temperature, max_new_tokens=max_tokens, num_return_sequences=cnt) #might add stopping criteria depending on heuristics experimentation
+
+        for o in out:
+            string_answer = tokenizer.decode(o)
+            outputs.extend([string_answer])
 
     return outputs
 
@@ -67,7 +65,7 @@ def hf_model(model, input_tokens, temperature=0.7, max_tokens=1000, n=1, stop=No
 def completions_with_backoff(**kwargs):
     return client.chat.completions.create(**kwargs)
 
-def chatgpt(messages, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
+def chatgpt(model, messages, temperature=0.7, max_tokens=1000, n=5, stop=None) -> list:
     global completion_tokens, prompt_tokens
     outputs = []
     client = OpenAI()
@@ -76,9 +74,8 @@ def chatgpt(messages, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop
         n -= cnt
 
         res = client.chat.completions.create(model=model, messages=messages, temperature=temperature, n=cnt, stop=stop)
-        res_answer = res.choices[0].message.content
-        # print(res_answer)
-        outputs.extend([res_answer]) #will add in support for n > 1 hyperparam later
+        res_answer = res.choices[0].message.content #answers get returned in a single message.content string even when n > 1; need to double check on why later
+        outputs.extend([res_answer]) 
 
         # log completion tokens
         completion_tokens += res.usage.completion_tokens
