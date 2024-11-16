@@ -69,13 +69,13 @@ def chatgpt(model, messages, temperature=0.7, max_tokens=1000, n=5, stop=None) -
     global completion_tokens, prompt_tokens
     outputs = []
     client = OpenAI()
+
     while n > 0:
         cnt = min(n, 20) 
         n -= cnt
 
         res = client.chat.completions.create(model=model, messages=messages, temperature=temperature, n=cnt, stop=stop)
-        res_answer = res.choices[0].message.content #answers get returned in a single message.content string even when n > 1; need to double check on why later
-        outputs.extend([res_answer]) 
+        outputs.extend([choice.message.content for choice in res.choices])
 
         # log completion tokens
         completion_tokens += res.usage.completion_tokens
