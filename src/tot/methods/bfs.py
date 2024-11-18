@@ -6,26 +6,33 @@ from ..models import inference_model
 def get_value(task, x, y, n_evaluate_sample, cache_value=True):
     value_prompt = task.value_prompt_wrap(x, y)
     if cache_value and value_prompt in task.value_cache:
-        return task.value_cache[value_prompt]
-    value_outputs = inference_model(value_prompt, n=n_evaluate_sample, stop=None)
+        return task.value_cache[value_prompt], 0.0 #0 for inference latency bc cache was used
+    value_outputs, eval_time = inference_model(value_prompt, n=n_evaluate_sample, stop=None)
+
     value = task.value_outputs_unwrap(x, y, value_outputs)
+
     if cache_value:
         task.value_cache[value_prompt] = value
-    return value
+
+    return [value, eval_time[0]] #assumes one value, one time element
 
 def get_values(task, x, ys, n_evaluate_sample, cache_value=True):
 
     values = []
+    times = []
     local_value_cache = {}
     for y in ys:  # each partial output
         if y in local_value_cache:  # avoid duplicate candidates
             value = 0
+            time = 0
         else:    
-            value = get_value(task, x, y, n_evaluate_sample, cache_value=cache_value)
+            value, time = get_value(task, x, y, n_evaluate_sample, cache_value=cache_value)
             local_value_cache[y] = value
+
         values.append(value)
+        times.append(time)
     # print(values)
-    return values
+    return values, times
 
 def get_votes(task, x, ys, n_evaluate_sample):
     vote_prompt = task.vote_prompt_wrap(x, ys)
@@ -34,10 +41,12 @@ def get_votes(task, x, ys, n_evaluate_sample):
     return values
 
 def get_proposals(task, x, y): 
+    final_proposals = []
     propose_prompt = task.propose_prompt_wrap(x, y)
-    proposals = inference_model(propose_prompt, n=5, stop=None)[0].split('\n')
-
-    return [y + _ + '\n' for _ in proposals]
+    proposals, generate_times = inference_model(propose_prompt, n=5, stop=None)
+    for prop in proposals:
+        final_proposals.extend(prop.split('\n'))
+    return ([y + _ + '\n' for _ in final_proposals], generate_times)
 
 def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
     if prompt_sample == 'standard':
@@ -59,20 +68,29 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
 
     for step in range(task.steps):
         print("Started Steps!!")
+
         # generation
         if args.method_generate == 'sample':
             new_ys = [get_samples(task, x, y, args.n_generate_sample, prompt_sample=args.prompt_sample, stop=task.stops[step]) for y in ys]
         # elif args.method_generate == 'propose':
         else:
             new_ys = [get_proposals(task, x, y) for y in ys]
-        new_ys = list(itertools.chain(*new_ys))
+        new_ys, generate_times = new_ys[0]
+
+
+
+        new_ys = list(itertools.chain(new_ys))
         ids = list(range(len(new_ys)))
+
+        print("these are the new ys")
+        print(new_ys)
+        print("****")
 
         # evaluation
         if args.method_evaluate == 'vote':
             values = get_votes(task, x, new_ys, args.n_evaluate_sample)
         elif args.method_evaluate == 'value':
-            values = get_values(task, x, new_ys, args.n_evaluate_sample)
+            values, eval_times = get_values(task, x, new_ys, args.n_evaluate_sample)
         
         # selection
         if args.method_select == 'sample':
@@ -85,9 +103,9 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
         # log
         if to_print: 
             sorted_new_ys, sorted_values = zip(*sorted(zip(new_ys, values), key=lambda x: x[1], reverse=True))
-            print(f'-- new_ys --: {sorted_new_ys}\n-- sol values --: {sorted_values}\n-- choices --: {select_new_ys}\n')
+            print(f'-- new_ys --: {sorted_new_ys}\n-- sol values --: {sorted_values}\n-- choices --: {select_new_ys}\n-- generate times --: {generate_times}\n-- eval times --: {eval_times}\n')
         
-        infos.append({'step': step, 'x': x, 'ys': ys, 'new_ys': new_ys, 'values': values, 'select_new_ys': select_new_ys})
+        infos.append({'step': step, 'x': x, 'ys': ys, 'new_ys': new_ys, 'values': values, 'select_new_ys': select_new_ys, 'generate_times': generate_times, 'eval_times': eval_times})
         ys = select_new_ys
     
     if to_print: 

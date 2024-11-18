@@ -17,8 +17,19 @@ def run(args):
     '''
     #load in non-gpt model in this driver function for now to avoid repeated loading later on
     if args.backend == 'llama':
-        tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
-        model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+        if not args.quantize:
+            tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+            model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+        elif args.quantize == 'qat':
+            pass
+            # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+            # model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct-QLORA_INT4_EO8")
+        elif args.backend == 'spinquant':
+            pass
+            # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+            # model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct-SpinQuant_INT4_EO8")
+        else:
+            pass
     else:
         model = None
         tokenizer = None
@@ -43,7 +54,7 @@ def run(args):
             ys, info = solve(args, task, i, model, tokenizer)
 
         runtime = time.perf_counter()-start_timer
-        print(runtime)
+        # print(runtime)
 
         # log
         infos = [task.test_output(i, y) for y in ys]
@@ -71,6 +82,7 @@ def parse_args():
 
     #what model to use
     args.add_argument('--backend', type=str, choices=['gpt-4o', 'llama'], default='gpt-4o')
+    args.add_argument('--quantize', type=str, choices=['qat', 'ptq', 'spinquant'])
 
     #what temperature to use
     args.add_argument('--temperature', type=float, default=0.0)
