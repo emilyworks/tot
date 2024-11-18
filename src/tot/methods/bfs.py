@@ -70,6 +70,7 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
         print("Started Steps!!")
 
         # generation
+        print("Started Generation...")
         if args.method_generate == 'sample':
             new_ys = [get_samples(task, x, y, args.n_generate_sample, prompt_sample=args.prompt_sample, stop=task.stops[step]) for y in ys]
         # elif args.method_generate == 'propose':
@@ -77,22 +78,18 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
             new_ys = [get_proposals(task, x, y) for y in ys]
         new_ys, generate_times = new_ys[0]
 
-
-
         new_ys = list(itertools.chain(new_ys))
         ids = list(range(len(new_ys)))
 
-        print("these are the new ys")
-        print(new_ys)
-        print("****")
-
         # evaluation
+        print("Finished Generation...Started Eval!")
         if args.method_evaluate == 'vote':
             values = get_votes(task, x, new_ys, args.n_evaluate_sample)
         elif args.method_evaluate == 'value':
             values, eval_times = get_values(task, x, new_ys, args.n_evaluate_sample)
         
         # selection
+        print("Finished Eval...Started Selection...")
         if args.method_select == 'sample':
             ps = np.array(values) / sum(values)
             select_ids = np.random.choice(ids, size=args.n_select_sample, p=ps).tolist()
@@ -101,6 +98,7 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
         select_new_ys = [new_ys[select_id] for select_id in select_ids]
 
         # log
+        print("Finished Selection...Logging...")
         if to_print: 
             sorted_new_ys, sorted_values = zip(*sorted(zip(new_ys, values), key=lambda x: x[1], reverse=True))
             print(f'-- new_ys --: {sorted_new_ys}\n-- sol values --: {sorted_values}\n-- choices --: {select_new_ys}\n-- generate times --: {generate_times}\n-- eval times --: {eval_times}\n')

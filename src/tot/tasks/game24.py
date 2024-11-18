@@ -46,12 +46,14 @@ class Game24Task(Task):
         numbers = re.findall(r'\d+', expression)
         problem_numbers = re.findall(r'\d+', self.data[idx])
         if sorted(numbers) != sorted(problem_numbers):
+            print("sorted numbers length not equal to sorted problem numbers length")
             return {'r': 0}
         try:
             # print(sympy.simplify(expression))
             return {'r': int(sympy.simplify(expression) == 24)}
         except Exception as e:
             # print(e)
+            print("entered exception!!")
             return {'r': 0}
             
     @staticmethod

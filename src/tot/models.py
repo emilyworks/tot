@@ -54,16 +54,20 @@ def hf_model(model, tokenizer, prompt, temperature=0.7, max_tokens=1000, n=5, st
         n -= cnt
 
         #actual generation
+        print(f"cnt is {cnt}. Sending inputs to model...")
+
         start_time = time.perf_counter()
         out = model.generate(**inputs, temperature=temperature, max_new_tokens=max_tokens, num_return_sequences=cnt) #might add stopping criteria depending on heuristics experimentation
         generate_time = time.perf_counter()-start_time
+
+        print(f"output recieved")
 
         for o in out:
             string_answer = tokenizer.decode(o)
             outputs.extend([string_answer])
 
         all_times.extend([generate_time/(float(cnt))]*cnt) #may modify this later to be more precise given hf is open source
-
+    print("Returning model inference outputs")
     return outputs, all_times
 
 # @backoff.on_exception(backoff.expo, openai.error.OpenAIError)
