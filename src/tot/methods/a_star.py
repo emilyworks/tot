@@ -34,6 +34,10 @@ def get_values(task, x, ys, n_evaluate_sample, cache_value=True):
     # print(values)
     return values, times
 
+def adjust_value_with_dist(value, dist, k=0.1):     # apply a multiplicative penalty to each value based on the distance from the start
+    new_val = value * np.exp(-k * dist)
+    return new_val
+
 def get_votes(task, x, ys, n_evaluate_sample):
     vote_prompt = task.vote_prompt_wrap(x, ys)
     vote_outputs = inference_model(vote_prompt, n=n_evaluate_sample, stop=None)
@@ -65,7 +69,7 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
     x = task.get_input(idx)  # input
     ys = ['']  # current output candidates
     infos = []
-
+    dist_from_start = {'': 0}
 
     for step in range(task.steps):
         print("Started Steps!!")
@@ -80,10 +84,12 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
             for y in ys:
                 generated_ys, generate_times = get_samples(task, x, y, args.n_generate_sample, prompt_sample=args.prompt_sample, stop=task.stops[step])
                 new_ys_with_times.extend(zip(generated_ys, generate_times))
+                dist_from_start.update({new_y: dist_from_start[y] + 1 for new_y in generated_ys})
         else:
             for y in ys:
                 generated_ys, generate_times = get_proposals(task, x, y)
                 new_ys_with_times.extend(zip(generated_ys, generate_times))
+                dist_from_start.update({new_y: dist_from_start[y] + 1 for new_y in generated_ys})
 
         new_ys, generate_times = zip(*new_ys_with_times)
         new_ys = list(new_ys)
@@ -102,6 +108,8 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
             values = get_votes(task, x, new_ys, args.n_evaluate_sample)
         elif args.method_evaluate == 'value':
             values, eval_times = get_values(task, x, new_ys, args.n_evaluate_sample)
+
+        values = [adjust_value_with_dist(value, dist_from_start[new_y]) for value, new_y in zip(values, new_ys)]
         
         # selection
         print("Finished Eval...Started Selection...")
