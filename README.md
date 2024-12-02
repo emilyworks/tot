@@ -2,8 +2,8 @@
 
 Exploration of the efficiency and efficacy of ToT using A* and MCTS search methods, as well as with other LLMs.
 
-Details TBA.
-
+For the files of the quantized models, please
+click [here](https://drive.google.com/drive/folders/101iMawJ5dXQu2YehHPyviDDM_Q3i6Np0?usp=sharing).
 
 Please find the README from the original ToT repository below the cut.
 
