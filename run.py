@@ -61,7 +61,8 @@ def run(args):
             ys, info = solve(args, task, i, model, tokenizer)
 
         runtime = time.perf_counter()-start_timer
-        # print(runtime)
+        print(f"""For iteration {i} -- 
+        Total Time to Solve: {runtime} seconds""")
 
         # log
         infos = [task.test_output(i, y) for y in ys]

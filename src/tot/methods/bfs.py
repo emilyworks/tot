@@ -2,6 +2,7 @@ import itertools
 import numpy as np
 from functools import partial
 from ..models import inference_model
+import time 
 
 def get_value(task, x, y, n_evaluate_sample, cache_value=True):
     value_prompt = task.value_prompt_wrap(x, y)
@@ -68,7 +69,7 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
 
 
     for step in range(task.steps):
-        print("Started Steps!!")
+        # print("Started Steps!!")
 
         # generation
         print("Started Generation...")
@@ -98,19 +99,31 @@ def solve(args, task, idx, model, tokenizer, to_print=True):
         # shouldn't worry about reevaluating the same ys as the values should be saved in the task cache
         # but could potentially add logic to remove expanded from queue
         print("Finished Generation...Started Eval!")
+
+        start_time = time.perf_counter()
+
         if args.method_evaluate == 'vote':
             values = get_votes(task, x, new_ys, args.n_evaluate_sample)
         elif args.method_evaluate == 'value':
             values, eval_times = get_values(task, x, new_ys, args.n_evaluate_sample)
         
+        eval_time = time.perf_counter()-start_time
+        print(f"Node Eval Time: {eval_time} seconds")
+        
         # selection
         print("Finished Eval...Started Selection...")
+
+        start_time = time.perf_counter()
+
         if args.method_select == 'sample':
             ps = np.array(values) / sum(values)
             select_ids = np.random.choice(ids, size=args.n_select_sample, p=ps).tolist()
         elif args.method_select == 'greedy':
             select_ids = sorted(ids, key=lambda x: values[x], reverse=True)[:args.n_select_sample]
         select_new_ys = [new_ys[select_id] for select_id in select_ids]
+
+        selection_time = time.perf_counter()-start_time()
+        print(f"Selection Time: {selection_time} seconds")
 
         # log
         print("Finished Selection...Logging...")
