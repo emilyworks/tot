@@ -27,9 +27,6 @@ def load_llama(quant=None):
 
     return model, tokenizer
 
-def propose(problem, current_state, tokenizer, model, device):
-    pass
-
 def value_proposals(problem, current_state, proposals, tokenizer, model, device):
     '''
     Takes in string values of problem, current state, and proposals. 
@@ -38,7 +35,7 @@ def value_proposals(problem, current_state, proposals, tokenizer, model, device)
     valuations = []
     prompts = []
     for p in proposals:
-        prompts.append(value_prompt.format(problem=problem, current_state=current_state, proposal=proposal))
+        prompts.append(value_prompt.format(problem=problem, current_state=current_state, proposal=p))
     
     values = tokenizer(prompts, return_tensors='pt')
     value_inputs = values['input_ids'].to(device)
@@ -58,8 +55,19 @@ def value_proposals(problem, current_state, proposals, tokenizer, model, device)
 
     return valuations
 
-def final_eval():
-    pass
+def final_eval(gt, final_prop):
+    '''
+    compare the ground truth and final proposed solution by the model
+    '''
+    print("THIS IS THE FINAL PROP")
+    print(final_prop)
+    print("THIS IS THE GT")
+    print(gt)
+
+    if gt in final_prop:
+        return 1.0
+    else:
+        return 0.0
 
 
 def run(args):
@@ -83,6 +91,9 @@ def run(args):
     #set up
     test_data = torch.load('src/tot/data/agg_dl_test.pt')
 
+    total = 0
+    right = 0
+
     for samples in test_data:
         
         for sample in samples: #going to do this one problem at a time for now.
@@ -97,6 +108,7 @@ def run(args):
             #start solving via tot
             start_timer = perf.counter()
             
+            selected = ""
             for i in range(args.depth): #args.depth number of attempts to reach the solution
                 
                 #propose next step/solutions per node/prompt
@@ -105,7 +117,7 @@ def run(args):
                     input_ids,
                     attention_mask=mask,
                     temperature=args.temperature, 
-                    max_new_tokens=max_tokens, 
+                    max_new_tokens=args.max_tokens, 
                     num_return_sequences=args.breadth)
 
                 
@@ -123,21 +135,28 @@ def run(args):
                 if 100.0 in valuations:
                     break
                 
-                #select the proposals that act as input to the next iteration
+                #select the best proposal
                 val_props = list(zip(proposals, valuations))
-                valuations.sort(key = lambda ele: ele[1], descending=True)
-                selected = valuations[:args.greedy_n]
+                val_props.sort(key = lambda ele: ele[1], descending=True)
+                selected = val_props[:args.greedy_n]
 
-                inputs = tokenizer(valuations, return_tensors='pt')
+                #format the chosen proposal for the next iteration
+                next_prompt = propose_prompt.format(problem=problem, current_state=selected)
+                inputs = tokenizer(next_prompt, return_tensors='pt')
                 input_ids = inputs['input_ids'].to(device)
                 mask = inputs['attention_mask'].to(device)
 
 
             #compare the proposed final answer vs the ground truth
             gt = tokenizer.decode(label, skip_special_token=True)
-            
-            judgement = final_eval(gt, final_proposal)
+            judgement = final_eval(gt, selected)
 
+            #keep track of the running totals
+            total += 1.0
+            right += judgement
+            print("Accuracy so far: ", total/right)
+
+    total_accuracy = right/total
 
 def parse_args():
     '''

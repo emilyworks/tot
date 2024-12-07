@@ -1,7 +1,7 @@
 import os
 import openai
 from openai import OpenAI
-import backoff 
+# import backoff 
 import torch
 import transformers
 import time
@@ -41,7 +41,8 @@ def hf_model(model, tokenizer, prompt, temperature=0.7, max_tokens=1000, n=5, st
     """
     outputs = []
     all_times = []
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
 
     #tokenize inputs
     inputs = tokenizer(prompt, return_tensors="pt")
