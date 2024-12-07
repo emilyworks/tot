@@ -1,4 +1,4 @@
-propose_prompt = '''Given a problem goal and a current state, propose one possible next step to solve the problem from the current state. If the current state solves the problem, say "current state is the solution".
+propose_prompt = '''[INST]Given a problem goal and a current state, propose one possible next step to solve the problem from the current state. If the current state solves the problem, say "current state is the solution".
 ###
 Here are two examples to help:
 
@@ -19,7 +19,7 @@ Choose the choice that best answer the following question:
     Choices:
     ['Adams only.', 'Brooks only.', 'Case only.', 'Adams and Brooks']
 Current State:
-Brooks Only.
+Choice 2
 Possible next step:
 current state is the solution.
 
@@ -28,10 +28,10 @@ Problem Goal:
 {problem}
 Current State:
 {current_state}
-Possible next step:
+Possible next step:[\INST]
 '''
 
-value_prompt = '''Given a problem goal, a current state, and a proposed next step, evaluate if the next step from the current state can help solve or answer the problem (yes/likely/no)
+value_prompt = '''[INST]Given a problem goal, a current state, and a proposed next step, evaluate if the next step from the current state can help solve or answer the problem (yes/likely/no)
 ###
 Here are three examples to help:
 Example #1:
@@ -52,7 +52,7 @@ Choose the choice that best answer the following question:
     Choices:
     ['Adams only.', 'Brooks only.', 'Case only.', 'Adams and Brooks']
 Current State:
-Adams and Brooks.
+Choice 4
 Proposal:
 current state is the solution.
 Evaluation:
@@ -65,7 +65,7 @@ Choose the choice that best answer the following question:
     Choices:
     ['Adams only.', 'Brooks only.', 'Case only.', 'Adams and Brooks']
 Current State:
-Brooks Only.
+Choice 2
 Proposal:
 current state is the solution.
 Evaluation:
@@ -78,5 +78,5 @@ Current State:
 {current_state}
 Proposal:
 {proposal}
-Evaluation:
+Evaluation:[\INST]
 '''

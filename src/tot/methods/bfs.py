@@ -62,7 +62,7 @@ def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
 def solve(args, task, idx, model, tokenizer, to_print=True):
     global inference_model
     inference_model = partial(inference_model, model=model, tokenizer=tokenizer, temperature=args.temperature)
-    # print(inference_model)
+    print(inference_model)
     x = task.get_input(idx)  # input
     ys = ['']  # current output candidates
     infos = []
@@ -145,3 +145,72 @@ def naive_solve(args, task, idx, to_print=True):
     x = task.get_input(idx)  # input
     ys = get_samples(task, x, '', args.n_generate_sample, args.prompt_sample, stop=None)
     return ys, {}
+
+def solve_bench(args, model, tokenizer, to_print=True, depth=5, breadth=2):
+    global inference_model
+    inference_model = partial(inference_model, model=model, tokenizer=tokenizer, temperature=args.temperature)
+
+    ys = ['']  # current output candidates
+    infos = []
+
+    for step in range(5): 
+        # print("Started Steps!!")
+
+        # generation
+        print("Started Generation...")
+        new_ys_with_times = []
+
+        generated_ys, generate_times = get_samples(task, x, y, args.n_generate_sample, prompt_sample=args.prompt_sample, stop=task.stops[step])
+        new_ys_with_times.extend(zip(generated_ys, generate_times))
+
+        new_ys, generate_times = zip(*new_ys_with_times)
+        new_ys = list(new_ys)
+        generate_times = list(generate_times)
+
+        # new_ys = list(itertools.chain(new_ys))
+        new_ys = ys + new_ys    # extend the current queue with the frontier
+        
+        ids = list(range(len(new_ys)))
+
+        # evaluation
+        # shouldn't worry about reevaluating the same ys as the values should be saved in the task cache
+        # but could potentially add logic to remove expanded from queue
+        print("Finished Generation...Started Eval!")
+
+        start_time = time.perf_counter()
+
+        if args.method_evaluate == 'vote':
+            values = get_votes(task, x, new_ys, args.n_evaluate_sample)
+        elif args.method_evaluate == 'value':
+            values, eval_times = get_values(task, x, new_ys, args.n_evaluate_sample)
+        
+        eval_time = time.perf_counter()-start_time
+        print(f"Node Eval Time: {eval_time} seconds")
+        
+        # selection
+        print("Finished Eval...Started Selection...")
+
+        start_time = time.perf_counter()
+
+        if args.method_select == 'sample':
+            ps = np.array(values) / sum(values)
+            select_ids = np.random.choice(ids, size=args.n_select_sample, p=ps).tolist()
+        elif args.method_select == 'greedy':
+            select_ids = sorted(ids, key=lambda x: values[x], reverse=True)[:args.n_select_sample]
+        select_new_ys = [new_ys[select_id] for select_id in select_ids]
+
+        selection_time = time.perf_counter()-start_time()
+        print(f"Selection Time: {selection_time} seconds")
+
+        # log
+        print("Finished Selection...Logging...")
+        if to_print: 
+            sorted_new_ys, sorted_values = zip(*sorted(zip(new_ys, values), key=lambda x: x[1], reverse=True))
+            print(f'-- new_ys --: {sorted_new_ys}\n-- sol values --: {sorted_values}\n-- choices --: {select_new_ys}\n-- generate times --: {generate_times}\n-- eval times --: {eval_times}\n')
+        
+        infos.append({'step': step, 'x': x, 'ys': ys, 'new_ys': new_ys, 'values': values, 'select_new_ys': select_new_ys, 'generate_times': generate_times, 'eval_times': eval_times})
+        ys = select_new_ys
+    
+    if to_print: 
+        print(ys)
+    return ys, {'steps': infos}

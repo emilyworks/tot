@@ -11,7 +11,7 @@ def get_current_numbers(y: str) -> str:
     return last_line.split('left: ')[-1].split(')')[0]
 
 
-class Game24Task(Task):
+class Bench(Task):
     """
     Input (x)   : a string of 
     Output (y)  : a trajectory of 3 steps to reach 24
@@ -24,7 +24,7 @@ class Game24Task(Task):
         6 * 4 = 24 (left: 24)
         (1 + 2 + 3) * 4 = 24
     """
-    def __init__(self, file='24.csv', depth=5):
+    def __init__(self, depth=5):
         """
         file: a csv file (fixed)
         """
@@ -34,13 +34,14 @@ class Game24Task(Task):
         self.steps = depth
         self.stops = None
 
-    def __len__(self) -> int:
-        return len(self.data)
+    # def __len__(self) -> int:
+    #     return len(self.data)
     
-    def get_input(self, idx: int) -> str:
-        return self.data[idx]
+    # def get_input(self, idx: int) -> str:
+    #     return self.data[idx]
 
     def test_output(self, idx: int, output: str):
+        gt = 
         expression = output.strip().split('\n')[-1].lower().replace('answer: ', '').split('=')[0]
         numbers = re.findall(r'\d+', expression)
         problem_numbers = re.findall(r'\d+', self.data[idx])
@@ -55,13 +56,13 @@ class Game24Task(Task):
             print("entered exception!!")
             return {'r': 0}
             
-    @staticmethod
-    def standard_prompt_wrap(x: str, y:str='') -> str:
-        return standard_prompt.format(input=x) + y
+    # @staticmethod
+    # def standard_prompt_wrap(x: str, y:str='') -> str:
+    #     return standard_prompt.format(input=x) + y
 
-    @staticmethod
-    def cot_prompt_wrap(x: str, y:str='') -> str:
-        return cot_prompt.format(input=x) + y
+    # @staticmethod
+    # def cot_prompt_wrap(x: str, y:str='') -> str:
+    #     return cot_prompt.format(input=x) + y
     
     @staticmethod
     def propose_prompt_wrap(x: str, y: str='') -> str:
