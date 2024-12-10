@@ -6,6 +6,7 @@ import random
 import multiprocessing
 import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
+import re
 
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
 tokenizer.pad_token = tokenizer.eos_token
@@ -28,6 +29,11 @@ class benchmark_dataset(torch.utils.data.Dataset):
     new_label = []
 
     for q, a in zip(self.input, self.labels):
+
+      matches = re.findall(r'\\boxed{([^}]*)}', a)
+      if len(matches) <= 0:
+        continue
+
       tk_len_q = len(tokenizer(str(q), return_tensors='pt')['input_ids'][0])
       tk_len_a = len(tokenizer(str(a), return_tensors='pt')['input_ids'][0])
 
@@ -41,7 +47,7 @@ class benchmark_dataset(torch.utils.data.Dataset):
     Len of New_Input: {len(new_input)}
     Len of New_Label: {len(new_label)}
 
-    Sample Input, Label: {new_input[0], new_label[0]}
+    Sample Input, Label: {new_input[1], new_label[1]}
 
     """)
 
