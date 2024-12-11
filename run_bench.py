@@ -71,6 +71,7 @@ def load_llama(quant=None):
         model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
 
     return model, tokenizer
+
 def a_star_penalty(num, depth, k=0.1):
     return num * np.exp(-k*depth)
 
@@ -118,7 +119,7 @@ def value_proposals(problem, current_state, proposals, tokenizer, model, device,
             else:
                 valuations.append(0.0)
 
-    for p, v in list(zip(noncached_proposals, valuations):
+    for p, v in list(zip(noncached_proposals, valuations)):
         cache[p] = v
 
     # could maybe be optimized but should be fine
@@ -138,24 +139,15 @@ def parse_problem(problem, math=False):
 
         # If there's a match, process the choices into a list
         if match:
-            # Extract the matched string (the list as a string)
-            choices_str = match.group(1)
-            
-            # Convert the string into a Python list using ast.literal_eval
+            choices_str = match.group(1)            
             choices_list = ast.literal_eval(choices_str)
-            
-            # print(choices_list)
 
             return choices_list
         else:
             print("No choices found.")
             return []
     else:
-        # print("THIS IS PROB")
-        # print(problem)
         matches = re.findall(r'\\boxed{([^}]*)}', problem)
-        # print("THESE ARE MATCHES")
-        # print(matches)
         if matches and len(matches) > 0:
             return matches[-1]
         else:
@@ -175,16 +167,6 @@ def final_eval(gt, final_prop, problem):
         try:
             parsed = parse_problem(problem)
             gt = parsed[int(gt)]
-            
-            # print(f"""
-            # ###
-            
-            # Here is the gt: {gt}
-
-            # Here is the final prop: {final_prop}
-
-            # ###
-            # """)
 
             all_pred.append(final_prop)
             all_gt.append(gt)
@@ -199,15 +181,7 @@ def final_eval(gt, final_prop, problem):
         gt = parse_problem(gt, math=True)
         all_pred.append(final_prop)
         all_gt.append(gt)
-        # print(f"""
-        # ###
-        
-        # Here is the gt: {gt}
 
-        # Here is the final prop: {final_prop}
-
-        # ###
-        # """)
         if isinstance(gt, str) and gt in final_prop:
             return 1.0
         else:
@@ -218,8 +192,6 @@ def get_test_data(tokenizer, batch_size):
     '''
     Process and return the composite benchmark test data in a dataloader
     '''
-    # print(tokenizer)
-
     gpqa_raw = load_dataset("Idavidrein/gpqa", "gpqa_diamond")
     gpqa_choices = [[a, b, c, d] for a, b, c, d in
                     zip(gpqa_raw['train']['Correct Answer'], gpqa_raw['train']['Incorrect Answer 1'],
@@ -324,14 +296,10 @@ def run(args):
     rsetup = time.perf_counter()
     ### SETUP MODEL ###
     #bc of the way the original repo is structured, will need to load in llama models in run.py to avoid repeated loading in models.py
-    if args.backend == 'llama':
-        if args.quantize:
-            model, tokenizer = load_llama(args.quantize)
-        else:
-            model, tokenizer = load_llama()
-    else: #gpt4 will be used later in this case
-        model = None
-        tokenizer = None
+    if args.quantize:
+        model, tokenizer = load_llama(args.quantize)
+    else:
+        model, tokenizer = load_llama()
 
     tokenizer.pad_token = tokenizer.eos_token
 
