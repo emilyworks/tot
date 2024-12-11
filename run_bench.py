@@ -134,18 +134,12 @@ def parse_problem(problem, math=False):
             # Convert the string into a Python list using ast.literal_eval
             choices_list = ast.literal_eval(choices_str)
             
-            # print(choices_list)
-
             return choices_list
         else:
             print("No choices found.")
             return []
     else:
-        # print("THIS IS PROB")
-        # print(problem)
         matches = re.findall(r'\\boxed{([^}]*)}', problem)
-        # print("THESE ARE MATCHES")
-        # print(matches)
         if matches and len(matches) > 0:
             return matches[-1]
         else:
@@ -165,16 +159,6 @@ def final_eval(gt, final_prop, problem):
         try:
             parsed = parse_problem(problem)
             gt = parsed[int(gt)]
-            
-            # print(f"""
-            # ###
-            
-            # Here is the gt: {gt}
-
-            # Here is the final prop: {final_prop}
-
-            # ###
-            # """)
 
             all_pred.append(final_prop)
             all_gt.append(gt)
@@ -185,19 +169,10 @@ def final_eval(gt, final_prop, problem):
         except:
             return 0.0
     else:
-        # print(gt)
         gt = parse_problem(gt, math=True)
         all_pred.append(final_prop)
         all_gt.append(gt)
-        # print(f"""
-        # ###
-        
-        # Here is the gt: {gt}
 
-        # Here is the final prop: {final_prop}
-
-        # ###
-        # """)
         if isinstance(gt, str) and gt in final_prop:
             return 1.0
         else:
@@ -208,8 +183,6 @@ def get_test_data(tokenizer, batch_size):
     '''
     Process and return the composite benchmark test data in a dataloader
     '''
-    # print(tokenizer)
-
     gpqa_raw = load_dataset("Idavidrein/gpqa", "gpqa_diamond")
     gpqa_choices = [[a, b, c, d] for a, b, c, d in
                     zip(gpqa_raw['train']['Correct Answer'], gpqa_raw['train']['Incorrect Answer 1'],
@@ -240,7 +213,6 @@ def solve(input_ids, label, mask, model, tokenizer, device, args):
     '''
     
     problem = tokenizer.batch_decode(input_ids, skip_special_tokens=True)[0]
-    # print(problem)
     selected = ""
     for i in range(args.depth): #args.depth number of attempts to reach the solution
         
@@ -263,11 +235,7 @@ def solve(input_ids, label, mask, model, tokenizer, device, args):
         for o in out:
             string_answer = tokenizer.decode(o, skip_special_tokens=True)
             string_answer = string_answer.split("Possible next step:")[-1]
-            # print(string_answer)
-            # print("+++++"*50)
-            # assert isinstance(string_answer, str)
             proposals.extend([string_answer])
-        # exit()
         reval = time.perf_counter()
         valuations = value_proposals(problem=problem, current_state=current_state, proposals=proposals, tokenizer=tokenizer, model=model, device=device)
         reval = time.perf_counter() - reval
