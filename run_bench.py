@@ -364,12 +364,13 @@ def run(args):
         "gt": all_gt,
         "pred": all_pred
     })
-    if args.quantize:
-        res.to_csv(f"./results_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
-    elif args.lora:
-        res.to_csv(f"./results_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
-    else:
-        res.to_csv("./res.csv")
+    if args.a_star:
+        if args.quantize:
+            res.to_csv(f"./results_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
+        elif args.lora:
+            res.to_csv(f"./results_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
+        else:
+            res.to_csv("./res.csv")
     
     rtotal = time.perf_counter()-rtotal
 
@@ -384,12 +385,14 @@ def run(args):
         "average eval time": sum(average_eval_time_per_sample)/len(average_eval_time_per_sample),
         "peak memory usage": peak
     }, index=[0])
-    if args.quantize:
-        time_df.to_csv(f"./times_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
-    elif args.lora:
-        time_df.to_csv(f"./times_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
-    else:
-        time_df.to_csv("./times.csv")
+
+    if args.a_star:
+        if args.quantize:
+            time_df.to_csv(f"./times_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
+        elif args.lora:
+            time_df.to_csv(f"./times_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
+        else:
+            time_df.to_csv("./times.csv")
     
     #courtesy prints
     print("TOTAL RUNNING TIME: ", rtotal)
