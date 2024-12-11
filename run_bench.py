@@ -60,7 +60,7 @@ def load_llama(quant=None):
         # model = AutoModelForCausalLM.from_pretrained("src/tot/quant/ptq_int8", device_map="cuda", weights_only=False)
         model = torch.compile(model, mode="max-autotune")
     elif args.quantize and args.quantize == 'qat':
-        model = AutoModelForCausalLM.from_pretrained("src/tot/quant/qat_int8", device_map="cuda", weights_only=False)
+        model = AutoModelForCausalLM.from_pretrained("src/tot/quant/qat_int8_20", device_map="cuda", weights_only=False)
         model = torch.compile(model, mode="max-autotune")
     elif args.lora:
         model = AutoPeftModelForCausalLM.from_pretrained("src/tot/lora")
@@ -410,23 +410,23 @@ if __name__ == '__main__':
     args = parse_args()
 
     #test base instruct llama
-    print(args)
-    run(args)
-
-    #test quant llama w/ qat int8
-    # args.quantize="qat"
     # print(args)
     # run(args)
 
-    #test llama w/ ptq int4
-    args.quantize="ptq_int4"
+    #test quant llama w/ qat int8
+    args.quantize="qat"
     print(args)
     run(args)
 
+    #test llama w/ ptq int4
+    # args.quantize="ptq_int4"
+    # print(args)
+    # run(args)
+
     #test llama w/ ptq int8
-    args.quantize="ptq_int8"
-    print(args)
-    run(args)
+    # args.quantize="ptq_int8"
+    # print(args)
+    # run(args)
 
     #test llama w/ lora
     # args.quantize=None
