@@ -63,7 +63,7 @@ def load_llama(quant=None):
         model = AutoModelForCausalLM.from_pretrained("src/tot/quant/qat_int8_20", device_map="cuda", weights_only=False)
         model = torch.compile(model, mode="max-autotune")
     elif args.lora:
-        model = AutoPeftModelForCausalLM.from_pretrained("src/tot/lora")
+        model = AutoPeftModelForCausalLM.from_pretrained("src/tot/lora/peft_15")
     # elif args.vllm:
         # sampling_params = SamplingParams(n=1, max_tokens=100)
         # model = LLM(model="meta-llama/Llama-3.2-3B-Instruct", trust_remote_code=True, gpu_memory_utilization=0.9, max_model_len=2048)  # Name or path of your model
@@ -350,13 +350,21 @@ def run(args):
         "gt": all_gt,
         "pred": all_pred
     })
-    if args.quantize:
-        res.to_csv(f"./results_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
-    elif args.lora:
-        res.to_csv(f"./results_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
+    if args.a_star:
+        if args.quantize:
+            res.to_csv(f"./results_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}_astar.csv")
+        elif args.lora:
+            res.to_csv(f"./results_{args.backend}_lora_{args.temperature}_{args.num_test_samp}_astar.csv")
+        else:
+            res.to_csv("./res.csv")
     else:
-        res.to_csv("./res.csv")
-    
+        if args.quantize:
+            res.to_csv(f"./results_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
+        elif args.lora:
+            res.to_csv(f"./results_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
+        else:
+            res.to_csv("./res_astar.csv")
+
     rtotal = time.perf_counter()-rtotal
 
     peak = torch.cuda.max_memory_allocated()
@@ -370,13 +378,21 @@ def run(args):
         "average eval time": sum(average_eval_time_per_sample)/len(average_eval_time_per_sample),
         "peak memory usage": peak
     }, index=[0])
-    if args.quantize:
-        time_df.to_csv(f"./times_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
-    elif args.lora:
-        time_df.to_csv(f"./times_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
+
+    if args.a_star:
+        if args.quantize:
+            time_df.to_csv(f"./times_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}_astar.csv")
+        elif args.lora:
+            time_df.to_csv(f"./times_{args.backend}_lora_{args.temperature}_{args.num_test_samp}_astar.csv")
+        else:
+            time_df.to_csv("./times_astar.csv")
     else:
-        time_df.to_csv("./times.csv")
-    
+        if args.quantize:
+            time_df.to_csv(f"./times_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
+        elif args.lora:
+            time_df.to_csv(f"./times_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
+        else:
+            time_df.to_csv("./times.csv")
     #courtesy prints
     print("TOTAL RUNNING TIME: ", rtotal)
     print("SETUP TIME: ", rsetup)
@@ -414,9 +430,9 @@ if __name__ == '__main__':
     # run(args)
 
     #test quant llama w/ qat int8
-    args.quantize="qat"
-    print(args)
-    run(args)
+    # args.quantize="qat"
+    # print(args)
+    # run(args)
 
     #test llama w/ ptq int4
     # args.quantize="ptq_int4"
@@ -429,8 +445,19 @@ if __name__ == '__main__':
     # run(args)
 
     #test llama w/ lora
-    # args.quantize=None
-    # args.lora = True
+    args.quantize=None
+    args.lora = True
+    print(args)
+    run(args)
+
+    #lora with the a_star run
+    a_star = True
+    print(args)
+    run(args)
+
+    #qat with the a_star run
+    # args.quantize='qat'
+    # args.lora=False
     # print(args)
     # run(args)
 
