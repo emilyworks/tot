@@ -445,13 +445,14 @@ if __name__ == '__main__':
     # run(args)
 
     #test llama w/ lora
-    args.quantize=None
-    args.lora = True
-    print(args)
-    run(args)
+    # args.quantize=None
+    # args.lora = True
+    # print(args)
+    # run(args)
 
     #lora with the a_star run
-    a_star = True
+    args.a_star = True
+    args.lora=True
     print(args)
     run(args)
 
