@@ -412,7 +412,7 @@ def parse_args():
     args = argparse.ArgumentParser()
 
     #the arguments to use for our purposes
-    args.add_argument('--backend', type=str, choices=['gpt-4o', 'llama'], default='gpt-4o')
+    args.add_argument('--backend', type=str, choices=['gpt-4o', 'llama'], default='llama')
     args.add_argument('--quantize', type=str, choices=['qat', 'ptq_int4', 'ptq_int8'])
     args.add_argument('--temperature', type=float, default=0.0)
     args.add_argument('--max_new_tokens', type=int, default=100)
@@ -432,44 +432,6 @@ if __name__ == '__main__':
     args = parse_args()
     print(args)
     run(args)
-
-    #test quant llama w/ qat int8
-    # args.quantize="qat"
-    # print(args)
-    # run(args)
-
-    #test llama w/ ptq int4
-    # args.quantize="ptq_int4"
-    # print(args)
-    # run(args)
-
-    #test llama w/ ptq int8
-    args.quantize='ptq_int8'
-    print(args)
-    run(args)
-
-    args.a_star = False
-    print(args)
-    run(args)
-
-
-    #test llama w/ lora
-    # args.quantize=None
-    # args.lora = True
-    # print(args)
-    # run(args)
-
-    #lora with the a_star run
-    # args.a_star = True
-    # args.lora=True
-    # print(args)
-    # run(args)
-
-    #qat with the a_star run
-    # args.quantize='qat'
-    # args.lora=False
-    # print(args)
-    # run(args)
 
     # print("THIS IS TEMP TUNING")
     # print(temp_tuning.items())
