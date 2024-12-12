@@ -31,6 +31,8 @@ from torchao.quantization.quant_api import (
     int8_weight_only
 )
 
+from torch.profiler import profile, record_function, ProfilerActivity
+
 all_gt = []
 all_pred = []
 
@@ -42,6 +44,7 @@ average_proposal_time_per_sample = []
 average_eval_time_per_sample = []
 
 temp_tuning = {}
+
 
 def load_llama(quant=None):
     '''Load in one of the llama models'''
@@ -55,12 +58,12 @@ def load_llama(quant=None):
         model = torch.compile(model, mode="max-autotune")
     elif args.quantize and args.quantize=='ptq_int8':
         model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
-        model.to('cuda')
         quantize_(model, int8_weight_only())
-        # model = AutoModelForCausalLM.from_pretrained("src/tot/quant/ptq_int8", device_map="cuda", weights_only=False)
         model = torch.compile(model, mode="max-autotune")
+        model.to('cuda')
+        # print(torch.cuda.memory_allocated())
     elif args.quantize and args.quantize == 'qat':
-        model = AutoModelForCausalLM.from_pretrained("src/tot/quant/qat_int8_20", device_map="cuda", weights_only=False)
+        model = AutoModelForCausalLM.from_pretrained("src/tot/quant/qat_int8_20", device_map="cuda")
         model = torch.compile(model, mode="max-autotune")
     elif args.lora:
         model = AutoPeftModelForCausalLM.from_pretrained("src/tot/lora/peft_15")
@@ -231,6 +234,7 @@ def solve(input_ids, label, mask, model, tokenizer, device, args):
         
         #propose next step/solutions per node/prompt
         rpropose = time.perf_counter()
+
         out = model.generate(
             input_ids,
             attention_mask=mask,
@@ -238,6 +242,7 @@ def solve(input_ids, label, mask, model, tokenizer, device, args):
             max_new_tokens=input_ids.shape[1]+args.max_new_tokens, 
             num_return_sequences=args.breadth,
             )
+
         rpropose = time.perf_counter()-rpropose
         average_proposal_time_per_sample.append(rpropose)
 
@@ -294,6 +299,7 @@ def run(args):
 
     rtotal = time.perf_counter()
     rsetup = time.perf_counter()
+
     ### SETUP MODEL ###
     #bc of the way the original repo is structured, will need to load in llama models in run.py to avoid repeated loading in models.py
     if args.quantize:
@@ -397,7 +403,7 @@ def run(args):
     print("TOTAL RUNNING TIME: ", rtotal)
     print("SETUP TIME: ", rsetup)
     print(f"PEAK GPU MEM USAGE: {peak / 1e6:.2f} MB")
-        
+
 
 def parse_args():
     '''
@@ -424,10 +430,8 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-
-    #test base instruct llama
-    # print(args)
-    # run(args)
+    print(args)
+    run(args)
 
     #test quant llama w/ qat int8
     # args.quantize="qat"
@@ -440,9 +444,14 @@ if __name__ == '__main__':
     # run(args)
 
     #test llama w/ ptq int8
-    # args.quantize="ptq_int8"
-    # print(args)
-    # run(args)
+    args.quantize='ptq_int8'
+    print(args)
+    run(args)
+
+    args.a_star = False
+    print(args)
+    run(args)
+
 
     #test llama w/ lora
     # args.quantize=None
@@ -451,10 +460,10 @@ if __name__ == '__main__':
     # run(args)
 
     #lora with the a_star run
-    args.a_star = True
-    args.lora=True
-    print(args)
-    run(args)
+    # args.a_star = True
+    # args.lora=True
+    # print(args)
+    # run(args)
 
     #qat with the a_star run
     # args.quantize='qat'
