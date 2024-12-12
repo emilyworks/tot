@@ -322,6 +322,7 @@ def run(args):
     count = 0
 
     rsetup = time.perf_counter()-rsetup
+    print(rsetup)
     
     for sample in test_data:
 
