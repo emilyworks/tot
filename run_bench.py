@@ -144,7 +144,6 @@ def parse_problem(problem, math=False):
         if match:
             choices_str = match.group(1)            
             choices_list = ast.literal_eval(choices_str)
-
             return choices_list
         else:
             print("No choices found.")
@@ -180,7 +179,6 @@ def final_eval(gt, final_prop, problem):
         except:
             return 0.0
     else:
-        # print(gt)
         gt = parse_problem(gt, math=True)
         all_pred.append(final_prop)
         all_gt.append(gt)
@@ -225,7 +223,6 @@ def solve(input_ids, label, mask, model, tokenizer, device, args):
     '''
     
     problem = tokenizer.batch_decode(input_ids, skip_special_tokens=True)[0]
-    # print(problem)
     selected = ""
     valuation_cache = {}    # cache for repeated valuations
     proposals = []    # persist the queue across iterations
@@ -253,12 +250,10 @@ def solve(input_ids, label, mask, model, tokenizer, device, args):
         for o in out:
             string_answer = tokenizer.decode(o, skip_special_tokens=True)
             string_answer = string_answer.split("Possible next step:")[-1]
-            # print(string_answer)
-            # print("+++++"*50)
-            # assert isinstance(string_answer, str)
             proposals.extend([string_answer])
         # exit()
         # could collect cache hit statistics if necessary
+
         reval = time.perf_counter()
         valuations, cache_hits = value_proposals(problem=problem, current_state=current_state, proposals=proposals, tokenizer=tokenizer, model=model, device=device, cache=valuation_cache)
         reval = time.perf_counter() - reval
