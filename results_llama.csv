@@ -1,0 +1,76 @@
+,gt,pred
+0,"Not wrong, Not wrong","Not wrong, Wrong."
+1,Hasty Generalization,"None, the current state is the solution."
+2,"7,500; the lactase persistence mutation","current state is the solution. 7,500; the lactase persistence mutation."
+3,The hydrogen bonds holding separate NH3 molecules together break apart.,The hydrogen bonds holding separate NH3 molecules together break apart.
+4,300 Kelvin,current state is the solution. 300 Kelvin.
+5,reticular formation,"hypothalamus, pituitary, and gonads are all involved in regulating sexual behavior. The hypothalamus is a region of the brain that plays a key role in regulating sexual behavior. The pituitary gland is a small gland located at the base of the brain that regulates the production of hormones that control sexual behavior. The gonads, or sex organs, produce hormones that regulate sexual behavior. Therefore, all three are involved in regulating sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in the regulation of sexual behavior. The reticular formation is a network of neurons in the brainstem that plays a role in regulating arousal and attention. It is involved in"
+6,Soto Zen,"None, the current state is the solution."
+7,The total point difference between Jenny's and Blake's tests was $10 - 10 + 20 + 20 = 40$ points.  The difference in their averages is $\frac{40}{4} = \boxed{10}$ points.,current state is the solution.
+8,"The two lengths of 6 units must be the two bases of the right triangle, because the hypotenuse in a right triangle must be longer than each base. Thus, the area of the triangle is $\frac{6\cdot6}{2}=\boxed{18}$ square units.",Use the Pythagorean theorem to find the length of the third side.
+9,"Let the three integers be $n-1$, $n$, $n+1$.  We have  $$(n-1)+n+(n+1) = 1341,$$ so $3n=1341$, which gives $n=447$.
+
+The largest of the three numbers is $n+1=\boxed{448}$.",448 + 3 = 451.
+10,"A five-digit palindrome would be of the form $ABCBA$, where $A$, $B$, and $C$ are digits (not necessarily distinct) from $0$ to $9$ (with $A$ from $1$ to $9$). We have three possibilities for each of $A$, $B$ and $C,$ which gives us $3^3 = \boxed{27}$ possible palindromes.","To find the number of five-digit palindromes, we can consider the number of choices for each digit. The first and last digits must be the same, so there are 3 choices for these digits. The second and fourth digits must also be the same, so there are 3 choices for these digits. The middle digit can be any of the three digits, so there are 3 choices for this digit. Therefore, the total number of five-digit palindromes is 3 x 3 x 3 = 27."
+11,IRA,"None, the current state is the solution."
+12,the representativeness heuristic and the availability heuristic,inductive reasoning and deductive reasoning
+13,An acf and pacf that both decline geometrically,current state is the solution. An acf that declines geometrically and a pacf that is zero after p lags.
+14,arguing that what is true in nature must be true about humans,substituting individual stories for a larger sample when supporting a generalization
+15,C ∨ D,Analyze the logical consequence of the premises.
+16,The pressures of the gases cannot be compared without knowing the number of molecules in each container.,The average kinetic energy of the hydrogen gas is greater than the nitrogen gas.
+17,2,"None, current state is the solution."
+18,Analytical,Historical School.
+19,"Closed, greenstick","None, the current state is the solution."
+20,We have  \[\frac{(10r^3)(4r^6)}{8r^4}= \frac{40r^{3+6}}{8r^4} = \frac{40}{8}r^{3+6-4} = \boxed{5r^5}.\],current state is the solution. 5r^5
+21,"Distributing and combining like terms, we have $a(2a+b)-2a^2+ab=2a^2+ab-2a^2+ab=2ab$. Now $a$ and $b$ are different prime numbers greater than 2, so $2ab=2^1\cdot a^1\cdot b^1$ has $(1+1)(1+1)(1+1)=\boxed{8}$ divisors.",Let $a=3$ and $b=5$. Then $a(2a+b)-2a^{2}+ab = 3(2\cdot 3+5)-2\cdot 3^{2}+3\cdot 5 = 3\cdot 11-2\cdot 9+15 = 33-18+15 = 30$. The prime factorization of 30 is $2\cdot 3\cdot 5$. The number of whole-number divisors of 30 is $(1+1)(1+1)(1+1) = 8$.
+22,"We factor and obtain $-(7x - 8)(3x + 5) = 0.$ Clearly, the only positive solution for $x$ occurs when $7x - 8 = 0,$ giving us $x = \boxed{\dfrac{8}{7}}.$",x = 4/3
+23,people infer their own attitudes and emotions by observing their own behaviors and the circumstances in which those behaviors occur.,"None, the current state is the solution."
+24,Secondary succession would begin to occur.,Only animal life would continue to inhabit the region.
+25,"Dividing the equations $x = \rho \sin \phi \cos \theta$ and $y = \rho \sin \phi \sin \theta,$ we get
+\[\tan \theta = \frac{y}{x} = \frac{-18}{10} = \boxed{-\frac{9}{5}}.\]",current state is the solution.
+26,35%,"None, the current state is the solution."
+27,"Wrong, Wrong","'Wrong, Wrong'"
+28,division,"None, current state is the solution."
+29,children with hearing impairments.,2. Children under the age of two.
+30,"J = 1, K = 1.","J = 0, K = 0."
+31,The sphere has radius $2/2=1$ inch and surface area \[4\pi(1^2)=\boxed{4\pi}\] square inches.,None. The current state is the solution.
+32,"False, False",Statement 2 is False.
+33,Divine power,"None, the current state is the solution."
+34,Mucous cells secrete the glycoprotein mucin,"None, the current state is the solution."
+35,Celotex,Seersucker.
+36,Evaluating gives  \[f(-1)=4(-1)^7+(-1)^5+3(-1)^2-2(-1)+c=-4-1+3+2+c=c.\]This is equal to 0 when $c=\boxed{0}$.,"Substitute x = -1 into the equation and solve for c. 
+
+Note: The response should be in the format specified, but the problem is not a numerical problem, so the answer will not be a number. 
+
+Please provide the next step to solve the problem. 
+
+Substituting x = -1 into the equation, we get:
+f(-1) = 4(-1)^7 + (-1)^5 + 3(-1)^2 - 2(-1) + c
+f(-1) = -4 - 1 + 3 + 2 + c
+f(-1) = 0 + c
+Since f(-1) = 0, we have:
+0 = 0 + c
+0 = c
+Therefore, the value of c is 0."
+37,a^3 = e,a^3 = e
+38,complements,"None, the current state is the solution."
+39,Parkinson's disease,"None, the current state is the solution."
+40,Quakers,"None, the current state is the solution."
+41,"There are only three possibilities for the first digit: \[
+\begin{array}{|c|c|}\hline
+\text{First digit} & \text{Last digit} \\ \hline
+3 & 1 \\ \hline
+6 & 2 \\ \hline
+9 & 3 \\ \hline
+\end{array}
+\] The middle digit can be any of the $10$ digits. The answer is $3\times 10=\boxed{30}.$","Let's try to find a 3-digit number with a first digit that is triple the final digit. What if the final digit is 1? Then the first digit would be 3. The number would be 311. Let's check if this number satisfies the condition. 3 * 1 = 3, which is the first digit. 1 * 1 = 1, which is the final digit. The number 311 satisfies the condition. Let's count how many 3-digit numbers satisfy the condition. We can start with the final digit 1 and count the numbers. The final digit can be 1, 2, 3, 4, 5, 6, 7, 8, or 9. For each final digit, we can find a corresponding first digit that is triple the final digit. Therefore, there are 9 numbers that satisfy the condition."
+42,decreases nonlinearly,current state is the solution. The normal force decreases nonlinearly as the angle of the plane increases.
+43,All of these options.,"None, the current state is the solution."
+44,"Has an uncertain relationship with skeletal health because research studies are confounded by associated lifestyle factors such as smoking, exercise and alcohol consumption","current state is the solution. Has an uncertain relationship with skeletal health because research studies are confounded by associated lifestyle factors such as smoking, exercise and alcohol consumption."
+45,MRI,"EEG
+
+Note: The goal is to determine the type of brain scan used in the given scenario. The current state is MRI, which is a type of scan. The next step is to consider the characteristics of each type of scan to determine which one is most likely used in this scenario. EEG is a type of scan that is commonly used to examine the electrical activity of the brain, making it a plausible next step."
+46,I and III only,II. {uv : u \in U and v \in V}
+47,psychology,None of the above. The correct answer is B) psychology.
+48,"Not wrong, Wrong","Wrong, Wrong."
+49,Stage 2 - re-site cannula.,current state is the solution.
