@@ -34,7 +34,7 @@ average_solving_time_per_sample = []
 average_proposal_time_per_sample = []
 average_eval_time_per_sample = []
 
-temp_tuning = {} #used for tuning the temperature hyperparam.
+temp_tuning = {} #used for tuning the temperature hyperparam during a separate sub-experiment.
 
 
 def load_llama(args):
@@ -56,7 +56,6 @@ def load_llama(args):
         model = torch.compile(model, mode="max-autotune")
     elif args.lora:
         model = AutoPeftModelForCausalLM.from_pretrained("src/tot/lora/peft_15")
-        print("CONFIRMED: USING LORA")
     else:
         model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
 
@@ -76,9 +75,11 @@ def value_proposals(problem, current_state, proposals, tokenizer, model, device,
     valuations = []
     prompts = []
 
-    # only eval if not prev evaluated
+    #evaluate proposals that are not in cache.
+    #during evaluation, assign a numerical value to the proposals based on how 'promising' they are for reaching the solution
+
     noncached_proposals = [p for p in proposals if p not in cache]
-    cache_hits = len(proposals) - len(noncached_proposals)
+    cache_hits = len(proposals) - len(noncached_proposals) #a courtesy statistic
     
     for p in noncached_proposals:
         prompts.append(value_prompt.format(problem=problem, current_state=current_state, proposal=p))
@@ -117,7 +118,6 @@ def value_proposals(problem, current_state, proposals, tokenizer, model, device,
         for p, v in list(zip(noncached_proposals, valuations)):
             cache[p] = v
 
-    # could maybe be optimized but should be fine
     valuations = [cache[p] for p in proposals]
 
     return valuations, cache_hits
@@ -125,6 +125,7 @@ def value_proposals(problem, current_state, proposals, tokenizer, model, device,
 def parse_problem(problem, math=False):
     '''
     Helper function to parse the answer out of the ground-truth paragraph.
+    (note: math=false param was used for a previous experiment iteration with other datasets. currently, parse_problem always expected to be called w/ math=True)
     '''
     matches = re.findall(r'\\boxed{([^}]*)}', problem)
     if matches and len(matches) > 0:
@@ -166,7 +167,7 @@ def get_test_data(tokenizer, batch_size):
 
 def solve_astar(input_ids, label, mask, model, tokenizer, device, args):
     '''
-    the tot run for a single sample
+    The ToT run for a single sample for A*
     '''
     #some inits
     problem = tokenizer.batch_decode(input_ids, skip_special_tokens=True)[0]
@@ -190,14 +191,14 @@ def solve_astar(input_ids, label, mask, model, tokenizer, device, args):
         rpropose = time.perf_counter()-rpropose
         average_proposal_time_per_sample.append(rpropose)
 
-        #evaluate/rate the proposals
         current_state = tokenizer.batch_decode(input_ids, skip_special_tokens=True)[0]
         
         for o in out:
             string_answer = tokenizer.decode(o, skip_special_tokens=True)
             string_answer = string_answer.split("Possible next step:")[-1]
             proposals.extend([string_answer])
-
+        
+        #evaluate/rate the proposals
         reval = time.perf_counter()
         valuations, cache_hits = value_proposals(problem=problem, current_state=current_state, proposals=proposals, tokenizer=tokenizer, model=model, device=device, cache=valuation_cache, a_star=True, depth=i)
         reval = time.perf_counter() - reval
@@ -228,7 +229,7 @@ def solve_astar(input_ids, label, mask, model, tokenizer, device, args):
 
 def solve(input_ids, label, mask, model, tokenizer, device, args):
     '''
-    the tot run for a single sample
+    The ToT run for a single sample for baseline BFS
     '''
     #some inits
     problem = tokenizer.batch_decode(input_ids, skip_special_tokens=True)[0]
@@ -275,14 +276,11 @@ def solve(input_ids, label, mask, model, tokenizer, device, args):
         val_props.sort(key = lambda ele: ele[1], reverse=True)
         selected = val_props[:args.greedy_n][0][0]
 
-        # print(len(selected))
-
         #format the chosen proposal for the next iteration
         next_prompt = propose_prompt.format(problem=problem, current_state=selected)
         inputs = tokenizer(next_prompt, return_tensors='pt')
         input_ids = inputs['input_ids'].to(device)
         mask = inputs['attention_mask'].to(device)
-
 
     #compare the proposed final answer vs the ground truth
     gt = tokenizer.batch_decode(label, skip_special_tokens=True)
@@ -356,26 +354,6 @@ def run(args):
     print("Final Accuracy: ", right/total)
     # temp_tuning[args.temperature] = right/total
 
-    #Save record of the answers and predictions
-    # res = pd.DataFrame({
-    #     "gt": all_gt,
-    #     "pred": all_pred
-    # })
-    # if args.a_star:
-    #     if args.quantize:
-    #         res.to_csv(f"./results_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}_astar.csv")
-    #     elif args.lora:
-    #         res.to_csv(f"./results_{args.backend}_lora_{args.temperature}_{args.num_test_samp}_astar.csv")
-    #     else:
-    #         res.to_csv(f"./res_{args.backend}_{args.temperature}_{args.num_test_samp}_astar.csv")
-    # else:
-    #     if args.quantize:
-    #         res.to_csv(f"./results_{args.backend}_{args.quantize}_{args.temperature}_{args.num_test_samp}.csv")
-    #     elif args.lora:
-    #         res.to_csv(f"./results_{args.backend}_lora_{args.temperature}_{args.num_test_samp}.csv")
-    #     else:
-    #         res.to_csv(f"./res_{args.backend}_{args.temperature}_{args.num_test_samp}.csv")
-
     rtotal = time.perf_counter()-rtotal
 
     #save the profiling statistics
@@ -410,7 +388,8 @@ def run(args):
 
 def run_multiples(args):
     '''
-    helper function for running the same trial multiple times for stability. Returns the average stats across identical trials.
+    Helper function for running the same trial multiple times for stability. Saves a df of stats across identical trials.
+    Returns the average as a courtesy.
     '''
     #run the trials
     profiling_stats = run(args)
@@ -433,13 +412,13 @@ def run_multiples(args):
         else:
             profiling_stats.to_csv(f"./AGGprofiling_stats_{args.backend}_{args.temperature}_{args.num_test_samp}.csv")
 
-    #return info as dict.
+    #print and return info as dict.
     print(f"FINAL RESULTS FROM {args.num_repeat} RUNS:")
     print(args)
-    print(profiling_stats.mean().to_dict())
+    print(profiling_stats.mean().to_dict()) #can also easily be switched to median if desired. median is easy to see from the saved csvs above
     print("*****"*10)
 
-    return profiling_stats.mean().to_dict()
+    return profiling_stats.mean().to_dict() #can also easily be switched to median if desired
         
 def parse_args():
     '''
@@ -450,7 +429,7 @@ def parse_args():
     #the arguments to use for our purposes
     args.add_argument('--backend', type=str, choices=['gpt-4o', 'llama'], default='llama')
     args.add_argument('--quantize', type=str, choices=['qat', 'ptq_int4', 'ptq_int8'])
-    args.add_argument('--temperature', type=float, default=0.0)
+    args.add_argument('--temperature', type=float, default=0.7)
     args.add_argument('--max_new_tokens', type=int, default=100)
     args.add_argument('--depth', type=int, default=3)
     args.add_argument('--breadth', type=int, default=3)
@@ -469,65 +448,10 @@ def parse_args():
 if __name__ == '__main__':
     
     args = parse_args()
-
-    #assuming the first run is A* with the unmodified llama instruct
-    # print(args)
-    # run_multiples(args)
-
-    ### A* ###############
-
-    #ptq run with A*
-    # args.quantize = 'ptq_int4'
-    # print(args)
-    # run_multiples(args)
-
-    #ptq8 run with A*
-    # args.quantize = 'ptq_int8'
-    # print(args)
-    # run_multiples(args)
-
-    #qat run with A*
-    # args.quantize = 'qat'
-    # print(args)
-    # run_multiples(args)
-
-    #LoRA run with A*
-    # args.lora = True
-    # args.quantize = None
-    # print(args)
-    # run_multiples(args)
-
-    ### BFS runs ###############
-
-    args.a_star = False
-
-    #base run with BFS
-    # args.lora = False
-    # print(args)
-    # run_multiples(args)
-
-    #ptq run with BFS
-    # args.quantize = 'ptq_int4'
-    # print(args)
-    # run_multiples(args)
-
-    #ptq8 run with BFS
-    # args.quantize = 'ptq_int8'
-    # print(args)
-    # run_multiples(args)
-
-    #qat run with BFS
-    args.quantize = 'qat'
     print(args)
-    run_multiples(args)
+    run_multiples(args) #can also just call run(args) directly if only a single trial is desired
 
-    #LoRA run with BFS
-    args.lora = True
-    args.quantize = None
-    print(args)
-    run_multiples(args)
-
-    # Originally run for temperature hyperparam tuning
+    # Originally run for temperature hyperparam tuning for a separate prior experiment iteration.
     # print(temp_tuning.items())
     # temp = pd.DataFrame(temp_tuning)
     # temp.to_csv('./temp_tuning.csv')
