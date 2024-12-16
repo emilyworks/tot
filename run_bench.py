@@ -468,8 +468,9 @@ def parse_args():
 
 if __name__ == '__main__':
     
+    args = parse_args()
+
     #assuming the first run is A* with the unmodified llama instruct
-    # args = parse_args()
     # print(args)
     # run_multiples(args)
 
