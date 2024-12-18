@@ -9,8 +9,10 @@ We were specifically driven to extend upon ToT by the following:
 
 (**NOTE:** We originally intended to adapt the ToT source code repository for this project but due to a lack of fit, we eventually deforked and wrote our own repository implementations from scratch instead. However, please note that the deforking process has still preserved the commit history and Github contributor list from when the repository was forked. Please look to recent commits to see the code and contributors relevant to this specific project, as we did not end up using code from the original ToT repository.)
 
-## Quickstart
-From the root directory, run ```python run_bench.py``` followed by your desired parameters. 
+## Quickstart (for Llama)
+Ensure you are in the main branch for Llama runs, and the 'gpt' branch for GPT-4o runs. 
+
+Then, from the root directory, run ```python run_bench.py``` followed by your desired parameters. 
 
 E.g., ```python run_bench.py --backend llama --num_test_samp 50 --temperature 0.7``` to run the unmodified Llama3.2-3B-Instruct model on the first 50 (filtered) samples from the MATH test dataset with a temperature setting of 0.7.
 
