@@ -7,7 +7,7 @@ We were specifically driven to extend upon ToT by the following:
 
 **Problem Goal**: Explore the efficacy and efficiency of solving complex math problems with Tree-of-Thought.
 
-(NOTE: We originally intended to adapt the ToT source code repository for this project but due to a lack of fit, we eventually deforked and wrote our own repository implementations from scratch instead. However, please note that the deforking process has still preserved the commit history and Github contributor list from when the repository was forked. Please look to recent commits to see the code and contributors relevant to this specific project)
+(**NOTE:** We originally intended to adapt the ToT source code repository for this project but due to a lack of fit, we eventually deforked and wrote our own repository implementations from scratch instead. However, please note that the deforking process has still preserved the commit history and Github contributor list from when the repository was forked. Please look to recent commits to see the code and contributors relevant to this specific project)
 
 ## Quickstart
 From the root directory, run ```python run_bench.py``` followed by your desired parameters. 
@@ -15,6 +15,9 @@ From the root directory, run ```python run_bench.py``` followed by your desired 
 E.g., ```python run_bench.py --backend llama --num_test_samp 50 --temperature 0.7``` to run the unmodified Llama3.2-3B-Instruct model on the first 50 (filtered) samples from the MATH test dataset. 
 
 A list of all available args is listed below.
+
+Notes:
+- Please note that loading in the original Llama3.2-3b-Instruct model requires logging into huggingface, as the model sits in a gated repo.
 
 ## Args
 Please note all args are optional. There are several args used in this project that control the nature of each ToT run. For readability, they are grouped by purpose as follows:
