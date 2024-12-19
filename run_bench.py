@@ -105,7 +105,7 @@ def gpt_no_structure(messages, n=1, temperature=0.7, model='gpt-4o'):
     return [choice.message.content for choice in response.choices]
 
 
-def propose(problem, current, tree, num_return_sequences=3):
+def propose(problem, current, tree, num_return_sequences=3, temperature=0.7):
     messages = [solve_system_message] + solve_example_1  # + solve_example_2
     messages.append({'role': 'user', 'content': problem})
     tokens_used = sum([num_tokens_from_string(m['content']) for m in messages])
@@ -118,7 +118,7 @@ def propose(problem, current, tree, num_return_sequences=3):
                          for step in branch]
         messages.extend(step_messages)
 
-    proposals = gpt_completion(messages, SolutionStep, n=num_return_sequences)
+    proposals = gpt_completion(messages, SolutionStep, n=num_return_sequences, temperature=temperature)
 
     if proposals is None:
         print("Failed to get proposals - returning empty list")
@@ -127,21 +127,21 @@ def propose(problem, current, tree, num_return_sequences=3):
     return proposals
 
 
-def simple_cot(problem):
+def simple_cot(problem, agrs):
     messages = [simple_solve_system_message] + simple_solve_example_1
     messages.append({'role': 'user', 'content': problem})
-    response = gpt_completion(messages, SimpleSolutionChain, n=1)
+    response = gpt_completion(messages, SimpleSolutionChain, n=1, temperature=args.temperature)
     if response is None:
         print("Failed to get solution - returning empty list")
         return None
     return response[0]
 
 
-def gpt_eval(value_messages):
+def gpt_eval(value_messages, temperature=0.7):
     responses = []
     for value_message in value_messages:
         response = gpt_completion(
-            [value_system_message] + value_example_1 + [value_message], Evaluation)
+            [value_system_message] + value_example_1 + [value_message], Evaluation, temperature=temperature)
         if response is None:
             responses.append(None)
         else:
@@ -163,7 +163,7 @@ def create_value_message(problem, steps, proposal):
     return {'role': 'user', 'content': message}
 
 
-def value_proposals(problem, proposals, tree, cache, a_star=True):
+def value_proposals(problem, proposals, tree, cache, a_star=True, temperature=0.7):
     valuations = []
     value_messages = []
     depths = []
@@ -176,7 +176,7 @@ def value_proposals(problem, proposals, tree, cache, a_star=True):
         value_messages.append(create_value_message(problem, branch[:-1], p))
         depths.append(depth)
 
-    responses = gpt_eval(value_messages)
+    responses = gpt_eval(value_messages, temperature=temperature)
     values_depths = list(zip(responses, depths))
 
     if not a_star:
@@ -286,7 +286,7 @@ def solve(problem, solution_text, args):
         # propose next step/solutions per node/prompt
         rpropose = time.perf_counter()
 
-        out = propose(problem, current, tree, args.breadth)
+        out = propose(problem, current, tree, args.breadth, temperature=agrs.temperature)
 
         rpropose = time.perf_counter() - rpropose
         average_proposal_time_per_sample.append(rpropose)
@@ -299,7 +299,7 @@ def solve(problem, solution_text, args):
 
         reval = time.perf_counter()
         valuations, cache_hits = value_proposals(
-            problem, proposals, tree, valuation_cache, a_star=args.a_star)
+            problem, proposals, tree, valuation_cache, a_star=args.a_star, temperature=args.temperature)
         reval = time.perf_counter() - reval
         average_eval_time_per_sample.append(reval)
 
@@ -372,7 +372,7 @@ def run(args):
             user_message = {
                 'role': 'user', 'content': 'Solve the following math problem: ' + problem}
             solution = gpt_no_structure([no_cot_system_message, user_message],
-                                        n=1, temperature=0.7, model='gpt-4o')[0]
+                                        n=1, temperature=args.temperature, model='gpt-4o')[0]
             rsolve = time.perf_counter() - rsolve
 
         print(solution)
