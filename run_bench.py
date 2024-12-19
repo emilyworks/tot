@@ -321,12 +321,12 @@ def solve(problem, solution_text, args):
         print(f"Created {len(tree) - 1} nodes total")
 
     # compare the proposed final answer vs the ground truth
-    judgement = final_eval(solution_text, selected)
+    # judgement = final_eval(solution_text, selected)
     branch, _ = traverse_tree(tree, selected)
-    print(f"Solution branch: {branch}")
-    print(f"Judgement: {judgement}")
+    # print(f"Solution branch: {branch}")
+    # print(f"Judgement: {judgement}")
 
-    return judgement
+    return branch
 
 
 def get_test_data():
@@ -358,28 +358,26 @@ def run(args):
         print(f"Problem: {problem}")
         print(f"Solution: {solution_text}")
 
-        rsolve = time.perf_counter()
-        # judgement = solve(problem, solution_text, args)    # tot
-        # solution = simple_cot(problem)    # simple cot
-        user_message = {
-            'role': 'user', 'content': 'Solve the following math problem: ' + problem}
-        solution = gpt_no_structure([no_cot_system_message, user_message],
-                                    n=1, temperature=0.7, model='gpt-4o')[0]     # plain gpt-4o
-        rsolve = time.perf_counter() - rsolve
+        
+        if args.agent == 'tot':    # tot
+            rsolve = time.perf_counter()
+            solution = solve(problem, solution_text, args)
+            rsolve = time.perf_counter() - rsolve
+        elif args.agent == 'cot':    # cot
+            rsolve = time.perf_counter()
+            solution = simple_cot(problem)
+            rsolve = time.perf_counter() - rsolve
+        else:    # plain gpt-4o
+            rsolve = time.perf_counter()
+            user_message = {
+                'role': 'user', 'content': 'Solve the following math problem: ' + problem}
+            solution = gpt_no_structure([no_cot_system_message, user_message],
+                                        n=1, temperature=0.7, model='gpt-4o')[0]
+            rsolve = time.perf_counter() - rsolve
 
         print(solution)
 
         average_solving_time_per_sample.append(rsolve)
-
-    # temp save
-    res = pd.DataFrame({
-        "gt": all_gt,
-        "pred": all_pred
-    })
-
-    # courtesy prints
-    print("TOTAL RUNNING TIME: ", rtotal)
-    print("SETUP TIME: ", rsetup)
 
 
 def parse_args():
@@ -395,6 +393,8 @@ def parse_args():
     args.add_argument('--greedy_n', type=int, default=1)
     args.add_argument('--a_star', action='store_true')
     args.add_argument('--queue_size', type=int, default=7)
+    args.add_argument('--agent', choices=['zeroshot', 'cot', 'tot'], default='tot', help=f"Choose from: {', '.join(allowed_options)} (default: zeroshot)")
+)
 
     args = args.parse_args()
     return args
