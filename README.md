@@ -47,7 +47,7 @@ Please note all args are optional. There are several args used in this project t
 
 
 ## Repository Structure
-This main branch contains all code necessary to run Llama3.2-3B-Instruct with ToT on the processed MATH dataset. For GPT-4o, code, please switch to the branch 'gpt' (or visit https://github.com/r1p71d3/tot-math for gpt demo code).
+This branch contains all code necessary to run GPT with the original implementation of ToT on the processed MATH dataset. The tool-augmented implementation can be found [here](https://github.com/r1p71d3/tot-math). Please switch to the `main` branch for the Llama implementation.
 
 This repository is generally structured as follows:
 
