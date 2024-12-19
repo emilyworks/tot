@@ -19,7 +19,9 @@ The rest of the README is structured as follows:
 ## Quickstart
 Ensure you are in the main branch for Llama runs, and the 'gpt' branch for GPT-4o runs. If necessary, run ```pip install -r requirements.txt``` from the root directory to install any missing required packages.
 
-As the GPT runs require an OpenAI API key, please make sure to export it as an OPENAI_API_KEY env variable. You can also place a `.env` file containing the variable in the project directory. Please note that ToT req
+As the GPT runs require an OpenAI API key, please make sure to export it as an OPENAI_API_KEY env variable. You can also place a `.env` file containing the variable in the project directory. 
+
+**IMPORTANT:** please note that running ToT can result in a very significant token usage depending on the parameters. At default settings, it could be between **$0.5 and $1.2 per problem**. A single run of the benchmark attempts to solve 50 problems, with the costs scaling accordingly.
 
 Then, from the root directory, run ```python run_bench.py``` followed by your desired parameters.
 
