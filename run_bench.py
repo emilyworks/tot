@@ -390,7 +390,6 @@ def parse_args():
     args.add_argument('--temperature', type=float, default=0.7)
     args.add_argument('--depth', type=int, default=15)
     args.add_argument('--breadth', type=int, default=3)
-    args.add_argument('--greedy_n', type=int, default=1)
     args.add_argument('--a_star', action='store_true')
     args.add_argument('--queue_size', type=int, default=7)
     args.add_argument('--agent', choices=['zeroshot', 'cot', 'tot'], default='tot', help=f"Choose from: {', '.join(allowed_options)} (default: zeroshot)")
