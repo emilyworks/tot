@@ -9,6 +9,12 @@ We were specifically driven to extend upon ToT by the following:
 
 (**NOTE:** We originally intended to adapt the ToT source code repository for this project but due to a lack of fit, we eventually deforked and wrote our own repository implementations from scratch instead. However, please note that the deforking process has still preserved the commit history and Github contributor list from when the repository was forked. Please look to recent commits to see the code and contributors relevant to this specific project, as we did not end up using code from the original ToT repository.)
 
+The rest of the README is structured as follows:
+- Quickstart
+- Args (full descriptions of each optional argument that can be used during runs)
+- Repository/Directory Structure
+- Results and Brief Observations (for a full discussion, please see our final report)
+
 ## Quickstart (for Llama)
 Ensure you are in the main branch for Llama runs, and the 'gpt' branch for GPT-4o runs. 
 
@@ -67,3 +73,14 @@ This repository is generally structured as follows:
 - ```prompts/bench.py``` holds the model prompts used for the proposal and evaluation stages during the ToT run
 - ```lora/``` holds the adaptor files needed to initialize our LoRA-Llama model during the main run. Please note that it includes older experimental runs but "peft_15" is what we used for official runs.
 - ```quant/```holds the model files needed to initialize our QAT-Llama model during the main run. Please note that it includes older experimental runs but "qat_int8_20" is what we used for official runs.
+
+## Results (Llama)
+Our profiling statistics during inference for Llama3.2-3b-Instruct and its variants are as follows in the first table below. Overall, we find that the int4 post-training-quantized version of Llama introduced the most significant memory and latency savings while LoRA, when taking into account _both_ the BFS-baseline run and A* run, produced the best accuracies. From an algorithmic perspective, our custom A* implementation provided significant accuracy boosts across the board for all Llama model variants. For more details and analyses, please refer to our final report.
+
+We also profiled the finetuning process for our Llama variants that required it (QAT and LoRA) in the second table below. Overall, the LoRA version of Llama was both significantly faster and occupied slightly less memory than its QAT counterpart, making it, in the context of our experiments, a much more accessible and practical option for fine-tuning models in preparation for ToT inference. For more details and analyses, please refer to our final report.
+
+![image](https://github.com/user-attachments/assets/4176d51a-b5c9-449d-acb6-b3cb35110793)
+
+![image](https://github.com/user-attachments/assets/0fa2b969-3f89-488b-8d87-7222caf197a4)
+
+
